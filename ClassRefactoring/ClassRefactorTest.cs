@@ -4,6 +4,7 @@ namespace DeveloperSample.ClassRefactoring
 {
     public class ClassRefactorTest
     {
+        //+ve test
         [Fact]
         public void AfricanSwallowHasCorrectSpeed()
         {
@@ -17,7 +18,7 @@ namespace DeveloperSample.ClassRefactoring
         {
             var swallowFactory = new SwallowFactory();
             var swallow = swallowFactory.GetSwallow(SwallowType.African);
-            swallow.ApplyLoad(SwallowLoad.Coconut);
+            swallow.ApplyLoad(SwallowLoadType.Coconut);
             Assert.Equal(18, swallow.GetAirspeedVelocity());
         }
 
@@ -34,7 +35,7 @@ namespace DeveloperSample.ClassRefactoring
         {
             var swallowFactory = new SwallowFactory();
             var swallow = swallowFactory.GetSwallow(SwallowType.European);
-            swallow.ApplyLoad(SwallowLoad.Coconut);
+            swallow.ApplyLoad(SwallowLoadType.Coconut);
             Assert.Equal(16, swallow.GetAirspeedVelocity());
         }
     }
