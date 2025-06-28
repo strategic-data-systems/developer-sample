@@ -12,39 +12,43 @@ namespace DeveloperSample.Syncing
         public List<string> InitializeList(IEnumerable<string> items)
         {
             var bag = new ConcurrentBag<string>();
-            Parallel.ForEach(items, async i =>
+
+            var tasks = items.Select(async i =>
             {
                 var r = await Task.Run(() => i).ConfigureAwait(false);
                 bag.Add(r);
             });
-            var list = bag.ToList();
-            return list;
-        }
 
+            Task.WaitAll(tasks.ToArray());
+
+            return bag.ToList();
+        }
         public Dictionary<int, string> InitializeDictionary(Func<int, string> getItem)
         {
             var itemsToInitialize = Enumerable.Range(0, 100).ToList();
+            var concurrentDictionary = new ConcurrentDictionary<int, Lazy<string>>();
 
-            var concurrentDictionary = new ConcurrentDictionary<int, string>();
             var threads = Enumerable.Range(0, 3)
-                .Select(i => new Thread(() => {
+                .Select(_ => new Thread(() =>
+                {
                     foreach (var item in itemsToInitialize)
                     {
-                        concurrentDictionary.AddOrUpdate(item, getItem, (_, s) => s);
+                        concurrentDictionary.GetOrAdd(
+                            item,
+                            _ => new Lazy<string>(() => getItem(item), LazyThreadSafetyMode.ExecutionAndPublication)
+                        );
                     }
                 }))
                 .ToList();
 
-            foreach (var thread in threads)
-            {
-                thread.Start();
-            }
-            foreach (var thread in threads)
-            {
-                thread.Join();
-            }
+            threads.ForEach(t => t.Start());
+            threads.ForEach(t => t.Join());
 
-            return concurrentDictionary.ToDictionary(kv => kv.Key, kv => kv.Value);
+            // Extract actual values from Lazy<string>
+            return concurrentDictionary.ToDictionary(kv => kv.Key, kv => kv.Value.Value);
         }
+
+
+
     }
 }
