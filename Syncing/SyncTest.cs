@@ -15,20 +15,21 @@ namespace DeveloperSample.Syncing
             Assert.Equal(items.Count, result.Count);
         }
 
-        [Fact(Skip="Not implemented")]
+        [Fact]
         public void ItemsOnlyInitializeOnce()
         {
             var debug = new SyncDebug();
             var count = 0;
             var dictionary = debug.InitializeDictionary(i =>
             {
-                Thread.Sleep(1);
+                Thread.Sleep(1); // simulate work
                 Interlocked.Increment(ref count);
                 return i.ToString();
             });
 
-            Assert.Equal(100, count);
+            Assert.Equal(100, count);       // getItem called only once per key
             Assert.Equal(100, dictionary.Count);
         }
+
     }
 }

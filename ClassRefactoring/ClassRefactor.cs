@@ -12,45 +12,44 @@ namespace DeveloperSample.ClassRefactoring
         None, Coconut
     }
 
+    public interface ISwallow
+    {
+        double GetAirspeedVelocity();
+    }
+
     public class SwallowFactory
     {
-        public Swallow GetSwallow(SwallowType swallowType) => new Swallow(swallowType);
+        public static ISwallow GetSwallow(SwallowType type, SwallowLoad load = SwallowLoad.None)
+        {
+            return (type, load) switch
+            {
+                (SwallowType.African, SwallowLoad.None) => new AfricanSwallow(),
+                (SwallowType.African, SwallowLoad.Coconut) => new AfricanSwallowWithCoconut(),
+                (SwallowType.European, SwallowLoad.None) => new EuropeanSwallow(),
+                (SwallowType.European, SwallowLoad.Coconut) => new EuropeanSwallowWithCoconut(),
+                _ => throw new InvalidOperationException("Unsupported combination")
+            };
+        }
     }
 
-    public class Swallow
+    public class AfricanSwallow : ISwallow
     {
-        public SwallowType Type { get; }
-        public SwallowLoad Load { get; private set; }
-
-        public Swallow(SwallowType swallowType)
-        {
-            Type = swallowType;
-        }
-
-        public void ApplyLoad(SwallowLoad load)
-        {
-            Load = load;
-        }
-
-        public double GetAirspeedVelocity()
-        {
-            if (Type == SwallowType.African && Load == SwallowLoad.None)
-            {
-                return 22;
-            }
-            if (Type == SwallowType.African && Load == SwallowLoad.Coconut)
-            {
-                return 18;
-            }
-            if (Type == SwallowType.European && Load == SwallowLoad.None)
-            {
-                return 20;
-            }
-            if (Type == SwallowType.European && Load == SwallowLoad.Coconut)
-            {
-                return 16;
-            }
-            throw new InvalidOperationException();
-        }
+        public double GetAirspeedVelocity() => 22;
     }
+
+    public class AfricanSwallowWithCoconut : ISwallow
+    {
+        public double GetAirspeedVelocity() => 18;
+    }
+
+    public class EuropeanSwallow : ISwallow
+    {
+        public double GetAirspeedVelocity() => 20;
+    }
+
+    public class EuropeanSwallowWithCoconut : ISwallow
+    {
+        public double GetAirspeedVelocity() => 16;
+    }
+
 }
