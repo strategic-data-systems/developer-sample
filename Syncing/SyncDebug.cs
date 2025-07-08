@@ -9,40 +9,27 @@ namespace DeveloperSample.Syncing
 {
     public class SyncDebug
     {
-        public List<string> InitializeList(IEnumerable<string> items)
+        // Basha - Here,  we are moving asynchronous programming, and we are waiting all tasks to be completed, so it wont block at here, it moves forward 
+        public async Task<List<string>> InitializeList(IEnumerable<string> items)
         {
-            var bag = new ConcurrentBag<string>();
-            Parallel.ForEach(items, async i =>
-            {
-                var r = await Task.Run(() => i).ConfigureAwait(false);
-                bag.Add(r);
-            });
-            var list = bag.ToList();
-            return list;
+            var bag= items.Select(async i => {
+                 var r = await Task.Run(() => i);
+                 return r;
+            })
+            
+            var list = await  Task.WhenAll(bag);
+            return list.ToList();
         }
-
+        
+      // Basha - we are looping on each item and doing manipulation of items and making the dictionary available.
         public Dictionary<int, string> InitializeDictionary(Func<int, string> getItem)
         {
             var itemsToInitialize = Enumerable.Range(0, 100).ToList();
-
             var concurrentDictionary = new ConcurrentDictionary<int, string>();
-            var threads = Enumerable.Range(0, 3)
-                .Select(i => new Thread(() => {
-                    foreach (var item in itemsToInitialize)
-                    {
-                        concurrentDictionary.AddOrUpdate(item, getItem, (_, s) => s);
-                    }
-                }))
-                .ToList();
 
-            foreach (var thread in threads)
-            {
-                thread.Start();
-            }
-            foreach (var thread in threads)
-            {
-                thread.Join();
-            }
+            Parallel.ForEach(itemsToInitialize, item =>{
+                 concurrentDictionary.AddOrUpdate(item, getItem, (_, __) => getItem(item));
+            });
 
             return concurrentDictionary.ToDictionary(kv => kv.Key, kv => kv.Value);
         }
