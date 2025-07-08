@@ -25,6 +25,7 @@ namespace DeveloperSample.ClassRefactoring
         public Swallow(SwallowType swallowType)
         {
             Type = swallowType;
+            Load= SwallowLoad.None;
         }
 
         public void ApplyLoad(SwallowLoad load)
@@ -32,25 +33,17 @@ namespace DeveloperSample.ClassRefactoring
             Load = load;
         }
 
+        // Basha - I am using here Switch statement to avoid code cognitive issues and improves code readability and easy for  mocking 
         public double GetAirspeedVelocity()
         {
-            if (Type == SwallowType.African && Load == SwallowLoad.None)
+            return (Type,Load) switch
             {
-                return 22;
-            }
-            if (Type == SwallowType.African && Load == SwallowLoad.Coconut)
-            {
-                return 18;
-            }
-            if (Type == SwallowType.European && Load == SwallowLoad.None)
-            {
-                return 20;
-            }
-            if (Type == SwallowType.European && Load == SwallowLoad.Coconut)
-            {
-                return 16;
-            }
-            throw new InvalidOperationException();
+                  (SwallowType.African,SwallowLoad.None) => 22,  
+                  (SwallowType.African ,SwallowLoad.Coconut) => 18,
+                  (SwallowType.European ,SwallowLoad.None) => 20,
+                  (SwallowType.European ,SwallowLoad.Coconut) => 16,
+                   _=> throw new InvalidOperationException("SwalloType and Load is not exists here")
+            };
         }
     }
 }
