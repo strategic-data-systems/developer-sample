@@ -7,9 +7,7 @@ const LoginAttemptList = (props) => (
 	<div className="Attempt-List-Main">
 	 	<p>Recent activity</p>
 	  	<input type="input" placeholder="Filter..." />
-		<ul className="Attempt-List">
-			<LoginAttempt>TODO</LoginAttempt>
-		</ul>
+		<ul className="Attempt-List">{props.children}</ul>
 	</div>
 );
 
